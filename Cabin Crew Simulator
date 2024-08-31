@@ -1,0 +1,381 @@
+local Player = game:GetService("Players").LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local jumpConnection
+local noclipEnabled = false  
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bloodball/-back-ups-for-libs/main/turtle"))()
+
+local OwO = library:Window("Cabin Crew Simulator")
+
+local espEnabled = false  -- Biến để theo dõi trạng thái ESP
+
+local function loadESP()
+    -- Tạo và cấu hình các phần tử ESP
+    _G.FriendColor = Color3.fromRGB(0, 255, 0)
+    _G.EnemyColor = Color3.fromRGB(255, 0, 0)
+    _G.UseTeamColor = true
+
+    local Holder = Instance.new("Folder", game.CoreGui)
+    Holder.Name = "ESP"
+
+    local NameTag = Instance.new("BillboardGui")
+    NameTag.Name = "nilNameTag"
+    NameTag.Enabled = false
+    NameTag.Size = UDim2.new(0, 200, 0, 50)
+    NameTag.AlwaysOnTop = true
+    NameTag.StudsOffset = Vector3.new(0, 1.8, 0)
+    local Tag = Instance.new("TextLabel", NameTag)
+    Tag.Name = "Tag"
+    Tag.BackgroundTransparency = 1
+    Tag.Position = UDim2.new(0, -50, 0, 0)
+    Tag.Size = UDim2.new(0, 300, 0, 20)
+    Tag.TextSize = 15
+    Tag.TextColor3 = Color3.new(100 / 255, 100 / 255, 100 / 255)
+    Tag.TextStrokeColor3 = Color3.new(0 / 255, 0 / 255, 0 / 255)
+    Tag.TextStrokeTransparency = 0.4
+    Tag.Text = "nil"
+    Tag.Font = Enum.Font.SourceSansBold
+    Tag.TextScaled = false
+
+    local function LoadCharacter(v)
+        repeat wait() until v.Character ~= nil
+        v.Character:WaitForChild("Humanoid")
+        local vHolder = Holder:FindFirstChild(v.Name) or Instance.new("Folder", Holder)
+        vHolder.Name = v.Name
+        vHolder:ClearAllChildren()
+
+        -- Tạo NameTag
+        local t = NameTag:Clone()
+        t.Name = v.Name .. "NameTag"
+        t.Enabled = true
+        t.Parent = vHolder
+        t.Adornee = v.Character:WaitForChild("Head", 5)
+        if not t.Adornee then
+            return UnloadCharacter(v)
+        end
+        t.Tag.Text = v.Name
+        t.Tag.TextColor3 = _G.UseTeamColor and v.TeamColor.Color or _G.EnemyColor
+
+        local function UpdateNameTag()
+            if not pcall(function()
+                v.Character.Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+            end) then
+                Update:Disconnect()
+            end
+        end
+
+        UpdateNameTag()
+        v.Character.Humanoid.Changed:Connect(UpdateNameTag)
+    end
+
+    local function UnloadCharacter(v)
+        local vHolder = Holder:FindFirstChild(v.Name)
+        if vHolder then
+            vHolder:Destroy()
+        end
+    end
+
+    local function LoadPlayer(v)
+        local vHolder = Instance.new("Folder", Holder)
+        vHolder.Name = v.Name
+
+        v.CharacterAdded:Connect(function()
+            LoadCharacter(v)
+        end)
+
+        v.CharacterRemoving:Connect(function()
+            UnloadCharacter(v)
+        end)
+
+        v.Changed:Connect(function(prop)
+            if prop == "TeamColor" then
+                UnloadCharacter(v)
+                wait()
+                LoadCharacter(v)
+            end
+        end)
+
+        if v.Character then
+            LoadCharacter(v)
+        end
+    end
+
+    local function UnloadPlayer(v)
+        UnloadCharacter(v)
+        local vHolder = Holder:FindFirstChild(v.Name)
+        if vHolder then
+            vHolder:Destroy()
+        end
+    end
+
+    -- Load ESP for existing players
+    for _, v in pairs(game:GetService("Players"):GetPlayers()) do
+        LoadPlayer(v)
+    end
+
+    -- Connect functions to player addition and removal events
+    game:GetService("Players").PlayerAdded:Connect(LoadPlayer)
+    game:GetService("Players").PlayerRemoving:Connect(UnloadPlayer)
+
+    game:GetService("Players").LocalPlayer.NameDisplayDistance = 0
+
+    if _G.Reantheajfdfjdgs then
+        return
+    end
+
+    _G.Reantheajfdfjdgs = ":suifayhgvsdghfsfkajewfrhk321rk213kjrgkhj432rj34f67df"
+
+    local players = game:GetService("Players")
+    local plr = players.LocalPlayer
+
+    function esp(target, color)
+        if target.Character then
+            if not target.Character:FindFirstChild("GetReal") then
+                local highlight = Instance.new("Highlight")
+                highlight.RobloxLocked = true
+                highlight.Name = "GetReal"
+                highlight.Adornee = target.Character
+                highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                highlight.FillColor = color
+                highlight.Parent = target.Character
+            else
+                target.Character.GetReal.FillColor = color
+            end
+        end
+    end
+
+    -- Update ESP for existing players
+    for _, v in pairs(players:GetPlayers()) do
+        if v ~= plr then
+            esp(v, _G.UseTeamColor and v.TeamColor.Color or ((plr.TeamColor == v.TeamColor) and _G.FriendColor or _G.EnemyColor))
+        end
+    end
+end
+
+OwO:Toggle("Esp Players", false, function(enabled)
+    if enabled then
+        loadESP()
+    else
+        -- Xóa tất cả các phần tử ESP
+        local Holder = game.CoreGui:FindFirstChild("ESP")
+        if Holder then
+            Holder:Destroy()
+        end
+
+        -- Xóa tất cả các Highlight đang có trên nhân vật
+        for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+            if player.Character then
+                for _, part in pairs(player.Character:GetDescendants()) do
+                    if part:IsA("Highlight") then
+                        part:Destroy()
+                    end
+                end
+            end
+        end
+
+        -- Xóa tất cả các phần tử NameTag còn lại
+        for _, obj in pairs(game.CoreGui:GetDescendants()) do
+            if obj:IsA("BillboardGui") and obj.Name:find("NameTag") then
+                obj:Destroy()
+            end
+        end
+
+        -- Ngừng các quá trình đang hoạt động liên quan đến ESP
+        if _G.Reantheajfdfjdgs then
+            _G.Reantheajfdfjdgs = nil
+        end
+    end
+end)
+
+
+OwO:Toggle("Inf Jump", false, function(enabled)
+    if enabled then
+        jumpConnection = UserInputService.JumpRequest:Connect(function()
+            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end)
+    else
+        if jumpConnection then
+            jumpConnection:Disconnect()
+            jumpConnection = nil
+        end
+    end
+end)
+
+OwO:Toggle("Noclip", false, function(enabled)
+    noclipEnabled = enabled
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+
+    local function enableNoClip()
+        while noclipEnabled do
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+            game:GetService("RunService").Stepped:Wait()
+        end
+    end
+
+    local function disableNoClip()
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    end
+
+    if noclipEnabled then
+        coroutine.wrap(enableNoClip)()
+    else
+        disableNoClip()
+    end
+   player.CharacterAdded:Connect(function(char)
+        character = char
+        if noclipEnabled then
+            coroutine.wrap(enableNoClip)()
+        else
+            disableNoClip()
+        end
+    end)
+end)
+
+local isFollowing = false
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local followConnection = nil
+
+local function followPlayerWithKnife(targetPlayer)
+    if followConnection then followConnection:Disconnect() end
+
+    followConnection = game:GetService("RunService").Heartbeat:Connect(function()
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local targetPosition = targetPlayer.Character.HumanoidRootPart.CFrame
+            -- Tính toán vị trí đằng sau người chơi có Knife
+            local behindPosition = targetPosition * CFrame.new(0, 0, 5)
+            -- Teleport đến vị trí phía sau người chơi có Knife
+            humanoidRootPart.CFrame = behindPosition
+        end
+    end)
+end
+
+local function startFollowingKnifePlayer()
+    for _, otherPlayer in pairs(game:GetService("Players"):GetPlayers()) do
+        if otherPlayer ~= player then
+            local knife = otherPlayer.Backpack:FindFirstChild("Knife") or (otherPlayer.Character and otherPlayer.Character:FindFirstChild("Knife"))
+            if knife then
+                followPlayerWithKnife(otherPlayer)
+                break
+            end
+        end
+    end
+end
+
+local function stopFollowingKnifePlayer()
+    if followConnection then
+        followConnection:Disconnect()
+        followConnection = nil
+    end
+end
+
+-- Toggle Button
+OwO:Toggle("Auto Knife", false, function(state)
+    isFollowing = state
+    if isFollowing then
+        startFollowingKnifePlayer()
+    else
+        stopFollowingKnifePlayer()
+    end
+end)
+
+OwO:Button("Script Premium", false, function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Marco8642/science/main/cabin%20crew"))()
+
+OwO:Box("Enter Speed", function(value)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+end)
+
+
+local OwO = library:Window("GamePass")
+
+OwO:Toggle("VIP", false, function(state)
+    if state then
+        game:GetService("Players").LocalPlayer.gamepasses["vip"].Value = true
+        print("Gamepass Work")
+    else
+        game:GetService("Players").LocalPlayer.gamepasses["vip"].Value = false
+    end
+end)
+
+OwO:Toggle("2x Money", false, function(state)
+    if state then
+        game:GetService("Players").LocalPlayer.gamepasses["x2_earnings"].Value = true
+    else
+        game:GetService("Players").LocalPlayer.gamepasses["x2_earnings"].Value = false
+    end
+end)
+
+OwO:Toggle("Đuôi Máy Bay Logo", false, function(state)
+    if state then
+        game:GetService("Players").LocalPlayer.gamepasses["tail_logo"].Value = true
+    else
+        game:GetService("Players").LocalPlayer.gamepasses["tail_logo"].Value = false
+    end
+end)
+
+OwO:Toggle("Kết Nối Nhiều khách", false, function(state)
+    if state then
+        game:GetService("Players").LocalPlayer.gamepasses["multiplayer"].Value = true
+    else
+        game:GetService("Players").LocalPlayer.gamepasses["multiplayer"].Value = false
+    end
+end)
+
+OwO:Toggle("Tùy Chỉnh Nhạc", false, function(state)
+if state then
+        game:GetService("Players").LocalPlayer.gamepasses["custom_music"].Value = true
+    else
+        game:GetService("Players").LocalPlayer.gamepasses["custom_music"].Value = false
+    end
+end)
+
+OwO:Toggle("Phòng Premium", false, function(state)
+if state then
+        game:GetService("Players").LocalPlayer.gamepasses["premium_room"].Value = true
+    else
+        game:GetService("Players").LocalPlayer.gamepasses["premium_room"].Value = false
+    end
+end)
+
+OwO:Toggle("Hỗ Trợ Khẩn Cấp", false, function(state)
+if state then
+        game:GetService("Players").LocalPlayer.gamepasses["emergency_control"].Value = true
+    else
+        game:GetService("Players").LocalPlayer.gamepasses["emergency_control"].Value = false
+    end
+end)
+
+OwO:Toggle("Phi Công Lành Nghề", false, function(state)
+if state then
+    game:GetService("Players").LocalPlayer.gamepasses["skilled_pilots"].Value = true
+else
+    game:GetService("Players").LocalPlayer.gamepasses["skilled_pilots"].Value = false
+end
+end)
+
+OwO:Toggle("Tiếp Viên Premium", false, function(state)
+ if state then
+        game:GetService("Players").LocalPlayer.gamepasses["premium_flight_attendant"].Value = true
+    else
+        game:GetService("Players").LocalPlayer.gamepasses["premium_flight_attendant"].Value = false
+    end
+end)
+
+game.StarterGui:SetCore("SendNotification", {
+                            Title = "Loading..", 
+                            Text = "Made By Shadow DZ" ,
+                            Icon = "rbxassetid://13877859492",
+                            Duration = 10
+                        })
